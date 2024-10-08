@@ -4,13 +4,13 @@ import logging
 from fsm_store import register_store_handlers
 from decouple import config
 
-TOKEN = config('BOT_TOKEN')
+TOKEN = config('BOT_TOKEN') # получаем токен бота через decouple
 
 bot = Bot(token=TOKEN)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=MemoryStorage()) # создаем диспетчер и кэш
 
-register_store_handlers(dp)
+register_store_handlers(dp) # регистрируем обработчики
 
 if __name__=='__main__':
     logging.basicConfig(level=logging.INFO)
-    executor.start_polling(dp, skip_updates=True)
+    executor.start_polling(dp, skip_updates=True) # запускаем бота

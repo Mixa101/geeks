@@ -6,40 +6,45 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardRemove
 from buttons import sizes_keyboard, sizes, cancel, yes_or_no
 
+# создаем состояния для управления вводом данных
 class fsm_store(StatesGroup):
-    product_name = State()
+    product_name = State() 
     size = State()
     category = State()
     price = State()
     photo = State()
     data_correction = State()
-    
+
+# обработчик кнопки отмены
 async def cancel_fsm(message : types.Message, state: FSMContext):
     if await state.get_state() is not None:
         await state.finish()
         await message.answer("Отменено", reply_markup=ReplyKeyboardRemove())
         
+# начало поиска
 async def start_product(message : types.Message):
     await message.answer("введите название товара:", reply_markup = cancel)
     await fsm_store.product_name.set()
 
+# ввод названия
 async def load_product_name(message : types.Message, state : FSMContext):
     async with state.proxy() as data:
         data['product_name'] = message.text
     await message.answer("Введите нужный размер:", reply_markup=sizes_keyboard)
     await fsm_store.next()
 
+# ввод размера
 async def load_size(message : types.Message, state : FSMContext):
-    if message.text in sizes:
+    if message.text in sizes: # исключаем другие размеры которых не существует
         async with state.proxy() as data:
             data['size'] = message.text
         await message.answer("Выберите категорию:", reply_markup=cancel)
         await fsm_store.next()
-    else:
+    else: # в случае неправильного ввода
         await message.answer(f"У нас нет такого размера!\n"
                             "выберите из кнопки!", reply_markup=sizes_keyboard)
 
-
+# ввод категорий
 async def load_category(message : types.Message, state : FSMContext):
     async with state.proxy() as data:
         data['category'] = message.text
@@ -47,8 +52,9 @@ async def load_category(message : types.Message, state : FSMContext):
     await message.answer("Введите цену:")
     await fsm_store.next()
 
+# ввод цены
 async def load_price(message : types.Message, state : FSMContext):
-    if message.text.isnumeric():
+    if message.text.isnumeric(): # проверяем сообщение на правильность (ну цена же не может быть из букв XD)
         async with state.proxy() as data:
             data['price'] = message.text
     
@@ -57,10 +63,12 @@ async def load_price(message : types.Message, state : FSMContext):
     else:
         await message.answer("Цена должна состоять из цифр!")
 
+# отправка фото
 async def load_photo(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['photo'] = message.photo[-1].file_id
     
+    # конечный штрих отправка всего что собрали
     await message.answer_photo(photo=data["photo"],
                             caption=f'Ваш товар:\n'
                             f'Название товара: {data["product_name"]}\n'
@@ -71,6 +79,7 @@ async def load_photo(message : types.Message, state: FSMContext):
     await message.answer("Все верно?", reply_markup=yes_or_no)
     await fsm_store.next()
 
+# здесь обрабатываем "Да" "Нет"
 async def correct_data(message : types.Message, state : FSMContext):
     if message.text.lower() == 'да':
         await message.answer('Сохранено в базу', reply_markup=ReplyKeyboardRemove())
@@ -82,6 +91,7 @@ async def correct_data(message : types.Message, state : FSMContext):
         await message.answer("не понял 'да' или 'нет'?", reply_markup=yes_or_no)
         
 def register_store_handlers(dp : Dispatcher):
+    # ниже регистрируем все что есть и указываем все фильтры
     dp.register_message_handler(cancel_fsm, Text(equals="Отмена", ignore_case=True),state='*')
     dp.register_message_handler(start_product, commands=['store'])
     dp.register_message_handler(load_product_name, state=fsm_store.product_name)
