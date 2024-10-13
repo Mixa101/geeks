@@ -4,7 +4,6 @@ import logging
 from fsm_store import register_store_handlers
 from decouple import config
 from db import db_main
-from config import admins
 
 
 TOKEN = config('BOT_TOKEN') # получаем токен бота через decouple
@@ -15,11 +14,9 @@ dp = Dispatcher(bot, storage=MemoryStorage()) # создаем диспетче�
 register_store_handlers(dp) # регистрируем обработчики
 
 async def on_startup(_):
-    for admin in admins:
-        await bot.send_message(chat_id=admin, text='Бот запущен!')
-        await db_main.sql_create()
+    await db_main.sql_create()
 
 
 if __name__=='__main__':
     logging.basicConfig(level=logging.INFO)
-    executor.start_polling(dp, skip_updates=True) # запускаем бота
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup) # запускаем бота
