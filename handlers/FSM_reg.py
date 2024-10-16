@@ -5,6 +5,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from buttons import cancel
 from aiogram.types import ReplyKeyboardRemove
 
+
 class fsm_registration(StatesGroup):
     fullname = State()
     age = State()
@@ -90,6 +91,7 @@ async def cancel_fsm(message : types.Message, state: FSMContext):
     if await state.get_state() is not None:
         await state.finish()
         await message.answer("Отменено", reply_markup=ReplyKeyboardRemove())
+
 
 def register_fsm_handlers(dp : Dispatcher):
     dp.register_message_handler(cancel_fsm, Text(equals="Отмена", ignore_case=True),state='*')

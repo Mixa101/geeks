@@ -13,10 +13,12 @@ async def sql_create():
     
     cursor.execute(queries.CREATE_TABLE_STORE)
     cursor.execute(queries.CREATE_TABLE_PRODUCT_DETAILS)
+    cursor.execute(queries.CREATE_TABLE_COLLECTION_PRODUCTS)
 
-async def sql_insert_product(product_id, product_name, size, price, photo, category, info_product):
+async def sql_insert_product(product_id, product_name, size, price, photo, category, info_product, collection):
     cursor.execute(queries.INSERT_DETAILS_QUERY, (product_id, category, info_product))
     cursor.execute(queries.INSERT_STORE_QUERY, (product_id, product_name, size, price, photo))
+    cursor.execute(queries.INSERT_COLLECTION_QUERY, (product_id, collection))
     db.commit()
 
 def sql_select_product() -> dict: 
@@ -31,7 +33,8 @@ def sql_select_product() -> dict:
         'photo' : product[5],
         'category' : product[7],
         'info' : product[-1],
-        'product_id' : product[1]
+        'product_id' : product[1],
+        'collection' : product[11]
         }
         filtered_products.append(row)
         

@@ -16,6 +16,7 @@ class fsm_store(StatesGroup):
     photo = State()
     info = State()
     product_id = State()
+    collection = State()
     data_correction = State()
 
 # обработчик кнопки отмены
@@ -85,7 +86,16 @@ async def load_id(message : types.Message, state : FSMContext):
         async with state.proxy() as data:
             data['id'] = int(message.text)
         
-        # конечный штрих отправка всего что собрали
+        await message.answer("Введите коллекцию: ")
+        await fsm_store.next()
+
+    else:
+        await message.answer("уникальное значение должно состоять из цифр!")
+
+async def get_collection(message : types.Message, state : FSMContext):
+    async with state.proxy() as data:
+        data['collection'] = message.text
+
         await message.answer_photo(photo=data["photo"],
                                 caption=f'Ваш товар:\n'
                                 f'Название товара: {data["product_name"]}\n'
@@ -93,19 +103,18 @@ async def load_id(message : types.Message, state : FSMContext):
                                 f'Категория: {data["category"]}\n'
                                 f'Цена: {data["price"]}\n'
                                 f'инфо: {data["info"]}\n'
-                                f'уникальное значение: {data["id"]}',
+                                f'уникальное значение: {data["id"]}\n'
+                                f'коллекция: {data["collection"]}',
                                 reply_markup=ReplyKeyboardRemove())
         await message.answer("Все верно?", reply_markup=yes_or_no)
         await fsm_store.next()
-    else:
-        await message.answer("уникальное значение должно состоять из цифр!")
 
 # здесь обрабатываем "Да" "Нет"
 async def correct_data(message : types.Message, state : FSMContext):
     if message.text.lower() == 'да':
         async with state.proxy() as data:
             await sql_insert_product(data['id'], data['product_name'], data['size'],
-                                     data['price'], data['photo'], data['category'], data['info'])
+                                     data['price'], data['photo'], data['category'], data['info'], data['collection'])
         await message.answer('Сохранено в базу',
                              reply_markup=ReplyKeyboardRemove())
         await state.finish()
@@ -125,6 +134,7 @@ async def get_all_products(message : types.Message):
                                    f"категория : {product['category']}\n"
                                    f"уникальное значение : {product['product_id']}\n"
                                    f"информация : {product['info']}\n"
+                                   f"коллекция : {product['collection']}\n"
                                    )
     
     # await message.answer(roducts)
@@ -139,5 +149,6 @@ def register_store_handlers(dp : Dispatcher):
     dp.register_message_handler(load_photo, state=fsm_store.photo, content_types=['photo'])
     dp.register_message_handler(load_info, state=fsm_store.info)
     dp.register_message_handler(load_id, state=fsm_store.product_id)
+    dp.register_message_handler(get_collection, state=fsm_store.collection)
     dp.register_message_handler(correct_data, state=fsm_store.data_correction)
     dp.register_message_handler(get_all_products, commands=['get'])

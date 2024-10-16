@@ -18,6 +18,15 @@ CREATE TABLE IF NOT EXISTS product_details (
 )
 """
 
+CREATE_TABLE_COLLECTION_PRODUCTS = """
+    CREATE TABLE IF NOT EXISTS collection_products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER,
+        collection varchar(255)
+    )
+"""
+
+
 INSERT_STORE_QUERY = """
     INSERT INTO store (product_id, name_product, size, price, photo)
     VALUES (?, ?, ?, ?, ?)
@@ -28,7 +37,13 @@ INSERT_DETAILS_QUERY = """
     VALUES (?, ?, ?)
 """
 
+INSERT_COLLECTION_QUERY = """
+    INSERT INTO collection_products (product_id, collection)
+    VALUES (?, ?)
+"""
+
 INPUT_PRODUCTS_QUERY = """
     SELECT * FROM store
     JOIN product_details ON store.product_id = product_details.product_id
+    JOIN collection_products ON store.product_id = collection_products.product_id
 """
