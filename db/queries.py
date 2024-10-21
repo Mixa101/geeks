@@ -47,3 +47,11 @@ INPUT_PRODUCTS_QUERY = """
     JOIN product_details ON store.product_id = product_details.product_id
     JOIN collection_products ON store.product_id = collection_products.product_id
 """
+
+GET_ALL_PRODUCTS = """
+    SELECT s.id, s.product_id, s.name_product, s.size, s.price,
+    s.photo, ds.category, ds.info_product, cs.collection
+    FROM store s
+    INNER JOIN product_details ds ON s.product_id = ds.product_id
+    INNER JOIN collection_products cs ON s.product_id = cs.product_id
+"""

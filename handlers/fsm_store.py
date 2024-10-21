@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardRemove
 from buttons import sizes_keyboard, sizes, cancel, yes_or_no
-from db.db_main import sql_insert_product, sql_select_product
+from db.db_main import sql_insert_product
 
 # создаем состояния для управления вводом данных
 class fsm_store(StatesGroup):
@@ -124,20 +124,6 @@ async def correct_data(message : types.Message, state : FSMContext):
     else:
         await message.answer("не понял 'да' или 'нет'?", reply_markup=yes_or_no)
 
-async def get_all_products(message : types.Message):
-    products = sql_select_product()
-    for product in products:
-        await message.answer_photo(photo = product['photo'],
-                                   caption =f"{product['id']}\nназвание: {product['product_name']}\n"
-                                   f"Размер : {product['size']}\n"
-                                   f"Цена : {product['price']}\n"
-                                   f"категория : {product['category']}\n"
-                                   f"уникальное значение : {product['product_id']}\n"
-                                   f"информация : {product['info']}\n"
-                                   f"коллекция : {product['collection']}\n"
-                                   )
-    
-    # await message.answer(roducts)
 def register_store_handlers(dp : Dispatcher):
     # ниже регистрируем все что есть и указываем все фильтры
     dp.register_message_handler(cancel_fsm, Text(equals="Отмена", ignore_case=True),state='*')
@@ -151,4 +137,3 @@ def register_store_handlers(dp : Dispatcher):
     dp.register_message_handler(load_id, state=fsm_store.product_id)
     dp.register_message_handler(get_collection, state=fsm_store.collection)
     dp.register_message_handler(correct_data, state=fsm_store.data_correction)
-    dp.register_message_handler(get_all_products, commands=['get'])

@@ -3,6 +3,7 @@ import sqlite3
 from db import queries
 
 db = sqlite3.connect('db/store.sqlite3')
+db.row_factory = sqlite3.Row
 cursor = db.cursor()
 
 
@@ -21,21 +22,7 @@ async def sql_insert_product(product_id, product_name, size, price, photo, categ
     cursor.execute(queries.INSERT_COLLECTION_QUERY, (product_id, collection))
     db.commit()
 
-def sql_select_product() -> dict: 
-    products = cursor.execute(queries.INPUT_PRODUCTS_QUERY).fetchall()
-    filtered_products = []
-    for product in products:
-        row = {
-        'id' : product[0],
-        'product_name' : product[2],
-        'size' : product[3],
-        'price' : product[4],
-        'photo' : product[5],
-        'category' : product[7],
-        'info' : product[-1],
-        'product_id' : product[1],
-        'collection' : product[11]
-        }
-        filtered_products.append(row)
-        
-    return filtered_products
+def fetch_all_products():
+    products = cursor.execute(queries.GET_ALL_PRODUCTS).fetchall()
+    products_list = [dict(product) for product in products]
+    return products_list

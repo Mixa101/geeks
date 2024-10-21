@@ -3,6 +3,7 @@ __pycache__/
 venv
 test.py
 store.sqlite3
+.vscode
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,pycharm,vim
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,pycharm,vim
